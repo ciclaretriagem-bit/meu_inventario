@@ -3,37 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajustar {{ material }}</title>
+    <title>Ajuste - {{ material }}</title>
     <style>
-        body { font-family: sans-serif; background-color: #f5f7fb; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
-        h2 { color: #2c3e50; margin-top: 10px; }
-        .qtd { font-size: 50px; font-weight: bold; color: #27ae60; margin: 20px 0; }
-        .container-acoes { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-        .btn-acao { width: 140px; height: 140px; font-size: 18px; font-weight: bold; border: none; border-radius: 12px; cursor: pointer; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .btn-subtrair { background-color: #e67e22; }
-        .btn-somar { background-color: #2980b9; }
-        .voltar { display: block; margin-top: 40px; color: #7f8c8d; text-decoration: none; font-size: 16px; padding: 15px; border: 1px solid #ccc; border-radius: 6px; }
+        body { font-family: sans-serif; padding: 20px; text-align: center; }
+        .qtd { font-size: 3em; color: #28a745; margin: 20px 0; }
+        .btn { display: inline-block; width: 45%; padding: 30px 0; font-size: 1.2em; border-radius: 8px; text-decoration: none; color: white; margin: 5px; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>{{ material }}</h2>
-        <div class="qtd">{{ qtd_atual }} kg</div>
-        
-        <form action="/atualizar" method="POST">
-            <input type="hidden" name="material" value="{{ material }}">
-            <div class="container-acoes">
-                <button type="submit" name="operacao" value="subtrair" class="btn-acao btn-subtrair">
-                    <span style="font-size: 50px;">-</span><br>SUBTRAIR
-                </button>
-                <button type="submit" name="operacao" value="somar" class="btn-acao btn-somar">
-                    <span style="font-size: 50px;">+</span><br>ADICIONAR
-                </button>
-            </div>
-        </form>
-        
-        <a href="/" class="voltar">← Voltar ao Painel</a>
-    </div>
+    <h1>{{ material }}</h1>
+    <div class="qtd">{{ qtd_atual }} {{ unidade }}</div>
+    
+    <form action="/atualizar" method="POST">
+        <input type="hidden" name="material" value="{{ material }}">
+        <button name="operacao" value="subtrair" class="btn" style="background:#e67e22;">-</button>
+        <button name="operacao" value="somar" class="btn" style="background:#2980b9;">+</button>
+    </form>
+    
+    <br><br>
+    <a href="/" style="font-size: 1.2em;">← Voltar ao Painel</a>
 </body>
 </html>
