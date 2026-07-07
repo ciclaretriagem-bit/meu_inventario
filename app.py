@@ -5,7 +5,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 
 app = Flask(__name__)
-
 CSV_FILE = 'estoque.csv'
 MATERIAIS_ORDEM = [
     "PET Cristal", "PET Verde", "PET Óleo", "PEAD Branco", "PEAD Colorido", 
@@ -46,32 +45,41 @@ def index():
 @app.route('/selecionar/<material>')
 def selecionar(material):
     estoque = ler_estoque()
-    qtd_atual = estoque.get(material, 0.0)
-    return render_template('ajuste.html', material=material, qtd_atual=qtd_atual)
+    return render_template('ajuste.html', material=material, qtd_atual=estoque.get(material, 0.0))
 
 @app.route('/atualizar', methods=['POST'])
 def atualizar():
     material = request.form.get('material')
     operacao = request.form.get('operacao')
-    valor_input = request.form.get('valor', '0').strip()
-    
-    try:
-        valor = float(valor_input.replace(',', '.')) if valor_input else 0.0
-    except:
-        valor = 0.0
-
     estoque = ler_estoque()
     qtd_atual = estoque.get(material, 0.0)
 
     if operacao == 'somar':
-        estoque[material] = round(qtd_atual + valor, 2)
+        estoque[material] = round(qtd_atual + 1.0, 2)
     elif operacao == 'subtrair':
-        estoque[material] = round(max(0.0, qtd_atual - valor), 2)
-    elif operacao == 'definir':
-        estoque[material] = round(max(0.0, valor), 2)
+        estoque[material] = round(max(0.0, qtd_atual - 1.0), 2)
 
     salvar_estoque(estoque)
-    return redirect(url_for('index'))
+    return render_template('ajuste.html', material=material, qtd_atual=estoque[material])
+
+@app.route('/gravar')
+def gravar():
+    estoque = ler_estoque()
+    try:
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_name('credenciais.json', scope)
+        client = gspread.authorize(creds)
+        sheet = client.open("Controle de Triagem Ciclare").sheet1
+        
+        linha_dados = [estoque.get(mat, 0.0) for mat in MATERIAIS_ORDEM]
+        sheet.append_row(linha_dados)
+        
+        # Zera tudo
+        salvar_estoque({mat: 0.0 for mat in MATERIAIS_ORDEM})
+        
+        return '''<script>alert("Contagem enviada!"); window.location.href="/";</script>'''
+    except Exception as e:
+        return f"Erro ao gravar: {str(e)} <br> <a href='/'>Voltar</a>"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
