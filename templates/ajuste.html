@@ -9,7 +9,11 @@
         .box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
         h2 { color: #2c3e50; margin-top: 0; }
         .qtd { font-size: 32px; font-weight: bold; color: #27ae60; margin: 15px 0; }
-        input[type="text"] { width: 80%; padding: 12px; font-size: 20px; text-align: center; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 20px; }
+        
+        .controle-peso { display: flex; justify-content: center; align-items: center; margin-bottom: 20px; gap: 10px; }
+        .btn-ajuste { width: 60px; height: 60px; font-size: 30px; font-weight: bold; border: none; border-radius: 8px; background-color: #ecf0f1; color: #2c3e50; cursor: pointer; }
+        input[type="text"] { width: 50%; padding: 12px; font-size: 20px; text-align: center; border: 1px solid #ccc; border-radius: 6px; }
+        
         .btn { width: 100%; padding: 14px; font-size: 16px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; color: white; }
         .btn-somar { background-color: #2980b9; }
         .btn-subtrair { background-color: #e67e22; }
@@ -24,7 +28,12 @@
         
         <form action="/atualizar" method="POST">
             <input type="hidden" name="material" value="{{ material }}">
-            <input type="text" name="valor" placeholder="0.0" inputmode="decimal" required autocomplete="off"><br>
+            
+            <div class="controle-peso">
+                <button type="button" class="btn-ajuste" onclick="mudarValor(-1)">-</button>
+                <input type="text" id="campo-valor" name="valor" value="1.0" inputmode="decimal" autocomplete="off">
+                <button type="button" class="btn-ajuste" onclick="mudarValor(1)">+</button>
+            </div>
             
             <button type="submit" name="operacao" value="somar" class="btn btn-somar">+ ADICIONAR PESO</button>
             <button type="submit" name="operacao" value="subtrair" class="btn btn-subtrair">- SUBTRAIR PESO</button>
@@ -32,5 +41,15 @@
         </form>
         <a href="/" class="voltar">← Voltar ao Painel</a>
     </div>
+
+    <script>
+        function mudarValor(alteracao) {
+            let campo = document.getElementById('campo-valor');
+            let valorAtual = parseFloat(campo.value.replace(',', '.')) || 0;
+            let novoValor = valorAtual + alteracao;
+            if (novoValor < 0) novoValor = 0;
+            campo.value = novoValor.toFixed(1);
+        }
+    </script>
 </body>
 </html>
