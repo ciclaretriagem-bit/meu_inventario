@@ -5,10 +5,11 @@ from flask import Flask, render_template, request, Response
 app = Flask(__name__)
 CSV_FILE = 'estoque.csv'
 
-MATERIAIS_ORDEM = [
-    "PET Cristal", "PET Misto/Cor", "PET Óleo", "PET Azul", "PET Verde", 
-    "Alumínio", "PP Natural", "PP Color", "PEAD Natural/Br", "PEAD Cores", 
+    MATERIAIS_ORDEM = [
+    "PET Cristal", "PET Misto Cor", "PET Óleo", "PET Azul", "PET Verde", 
+    "Alumínio", "PP Natural", "PP Color", "PEAD Natural BR", "PEAD Cores", 
     "Metalicos", "Aerosol", "Papelao"
+]
 ]
 
 def inicializar_csv():
