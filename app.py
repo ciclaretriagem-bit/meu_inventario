@@ -1,9 +1,8 @@
 import os
 import csv
 from flask import Flask, render_template, request, redirect, url_for
-import pandas as pd
-import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import gspread
 
 app = Flask(__name__)
 
@@ -54,52 +53,25 @@ def selecionar(material):
 def atualizar():
     material = request.form.get('material')
     operacao = request.form.get('operacao')
-    valor_input = request.form.get('valor', '0')
+    valor_input = request.form.get('valor', '0').strip()
     
     try:
-        valor = float(valor_input.replace(',', '.'))
-    except ValueError:
+        valor = float(valor_input.replace(',', '.')) if valor_input else 0.0
+    except:
         valor = 0.0
 
     estoque = ler_estoque()
     qtd_atual = estoque.get(material, 0.0)
 
     if operacao == 'somar':
-        estoque[material] = qtd_atual + valor
+        estoque[material] = round(qtd_atual + valor, 2)
     elif operacao == 'subtrair':
-        estoque[material] = max(0.0, qtd_atual - valor)
+        estoque[material] = round(max(0.0, qtd_atual - valor), 2)
     elif operacao == 'definir':
-        estoque[material] = max(0.0, valor)
+        estoque[material] = round(max(0.0, valor), 2)
 
     salvar_estoque(estoque)
     return redirect(url_for('index'))
 
-@app.route('/gravar')
-def gravar():
-    estoque = ler_estoque()
-    
-    try:
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name('credenciais.json', scope)
-        client = gspread.authorize(creds)
-        
-        # Abre a planilha pelo nome exato que você configurou
-        sheet = client.open("Controle de Triagem Ciclare").sheet1
-        
-        linha_dados = []
-        for mat in MATERIAIS_ORDEM:
-            linha_dados.append(estoque.get(mat, 0.0))
-            
-        sheet.append_row(linha_dados)
-        
-        # Zera o estoque local após gravar com sucesso
-        for mat in MATERIAIS_ORDEM:
-            estoque[mat] = 0.0
-        salvar_estoque(estoque)
-        
-        return render_template('gravado.html', status="Sucesso ao gravar no Google Sheets!")
-    except Exception as e:
-        return render_template('gravado.html', status=f"Erro ao conectar na Planilha: {str(e)}")
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000, debug=True)
+    app.run(host='0.0.0.0', port=10000)
