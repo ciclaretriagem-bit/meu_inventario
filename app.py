@@ -72,7 +72,7 @@ def gravar():
     estoque = ler_estoque()
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name('credenciais.json', scope)
+                creds = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(os.getcwd(), 'credenciais.json'), scope)
         client = gspread.authorize(creds)
         sheet = client.open("Controle de Triagem Ciclare").sheet1
         
