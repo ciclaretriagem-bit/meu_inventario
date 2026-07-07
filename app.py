@@ -5,11 +5,10 @@ from flask import Flask, render_template, request, Response
 app = Flask(__name__)
 CSV_FILE = 'estoque.csv'
 
-    MATERIAIS_ORDEM = [
+MATERIAIS_ORDEM = [
     "PET Cristal", "PET Misto Cor", "PET Óleo", "PET Azul", "PET Verde", 
     "Alumínio", "PP Natural", "PP Color", "PEAD Natural BR", "PEAD Cores", 
     "Metalicos", "Aerosol", "Papelao"
-]
 ]
 
 def inicializar_csv():
@@ -67,12 +66,8 @@ def baixar_resumo():
     for mat in MATERIAIS_ORDEM:
         if estoque.get(mat, 0.0) > 0:
             conteudo += f"{mat}: {estoque[mat]}\n"
-    
-    # Zera o estoque após baixar
     salvar_estoque({mat: 0.0 for mat in MATERIAIS_ORDEM})
-    
-    return Response(conteudo, mimetype='text/plain', 
-                    headers={'Content-Disposition': 'attachment;filename=triagem.txt'})
+    return Response(conteudo, mimetype='text/plain', headers={'Content-Disposition': 'attachment;filename=triagem.txt'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
