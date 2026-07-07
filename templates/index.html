@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Triagem - Ciclare</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f5f7fb; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        h1 { color: #2c3e50; font-size: 24px; text-align: center; margin-bottom: 25px; }
+        .container { width: 100%; max-width: 450px; display: flex; flex-direction: column; gap: 12px; }
+        .btn-material { background-color: #ffffff; color: #2c3e50; border: 1px solid #dcdfe6; padding: 18px; font-size: 18px; font-weight: 600; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        .btn-material:active { background-color: #f0f2f5; }
+        .btn-gravar { background-color: #27ae60; color: white; border: none; padding: 18px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; text-decoration: none; margin-top: 25px; width: 100%; max-width: 450px; box-shadow: 0 3px 6px rgba(39,174,96,0.2); }
+    </style>
+</head>
+<body>
+    <h1>Painel de Triagem</h1>
+    <div class="container">
+        {% for material in materiais %}
+            <a href="/selecionar/{{ material }}" class="btn-material">{{ material }}</a>
+        {% endfor %}
+    </div>
+    <a href="/gravar" class="btn-gravar" onclick="return confirm('Deseja mesmo enviar os dados para a Planilha Google e zerar o pátio local?');">
+        GRAVAR NA PLANILHA GOOGLE
+    </a>
+</body>
+</html>

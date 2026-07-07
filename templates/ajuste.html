@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajustar Material</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f5f7fb; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .box { background: white; padding: 25px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; }
+        h2 { color: #2c3e50; margin-top: 0; }
+        .qtd { font-size: 32px; font-weight: bold; color: #27ae60; margin: 15px 0; }
+        input[type="text"] { width: 80%; padding: 12px; font-size: 20px; text-align: center; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 20px; }
+        .btn { width: 100%; padding: 14px; font-size: 16px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 10px; color: white; }
+        .btn-somar { background-color: #2980b9; }
+        .btn-subtrair { background-color: #e67e22; }
+        .btn-definir { background-color: #7f8c8d; }
+        .voltar { display: inline-block; margin-top: 15px; color: #7f8c8d; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>{{ material }}</h2>
+        <div class="qtd">{{ qtd_atual }} kg</div>
+        
+        <form action="/atualizar" method="POST">
+            <input type="hidden" name="material" value="{{ material }}">
+            <input type="text" name="valor" placeholder="0.0" inputmode="decimal" required autocomplete="off"><br>
+            
+            <button type="submit" name="operacao" value="somar" class="btn btn-somar">+ ADICIONAR PESO</button>
+            <button type="submit" name="operacao" value="subtrair" class="btn btn-subtrair">- SUBTRAIR PESO</button>
+            <button type="submit" name="operacao" value="definir" class="btn btn-definir">= DEFINIR VALOR EXATO</button>
+        </form>
+        <a href="/" class="voltar">← Voltar ao Painel</a>
+    </div>
+</body>
+</html>
