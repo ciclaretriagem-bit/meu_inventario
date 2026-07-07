@@ -7,11 +7,11 @@ import gspread
 app = Flask(__name__)
 CSV_FILE = 'estoque.csv'
 
-# Ordem exata da sua planilha
+# Lista exata da sua planilha
 MATERIAIS_ORDEM = [
-    "PET Cristal", "PET Cor", "PET Óleo", "PET Azul", "PET Verde", 
-    "Alumínio", "PP Natural", "PP Cor", "PEAD Branco", "PEAD Cor", 
-    "Metálicos", "Aerossol", "Papelão"
+    "PET Cristal", "PET Misto/Cor", "PET Óleo", "PET Azul", "PET Verde", 
+    "Alumínio", "PP Natural", "PP Color", "PEAD Natural/Br", "PEAD Cores", 
+    "Metálicos", "Aerosol", "Papelao"
 ]
 
 def inicializar_csv():
@@ -53,8 +53,8 @@ def atualizar():
     material = request.form.get('material')
     operacao = request.form.get('operacao')
     
-    # Regra: 0.5 para Metálicos e Papelão, 1.0 para os demais
-    incremento = 0.5 if material in ["Metálicos", "Papelão"] else 1.0
+    # 0.5 para Metálicos e Papelao, 1.0 para os outros
+    incremento = 0.5 if material in ["Metálicos", "Papelao"] else 1.0
     
     estoque = ler_estoque()
     qtd_atual = estoque.get(material, 0.0)
@@ -72,15 +72,15 @@ def gravar():
     estoque = ler_estoque()
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-                creds = ServiceAccountCredentials.from_json_keyfile_name(os.path.join(os.getcwd(), 'credenciais.json'), scope)
+        # Caminho absoluto para evitar erros de leitura
+        caminho_chave = os.path.join(os.getcwd(), 'credenciais.json')
+        creds = ServiceAccountCredentials.from_json_keyfile_name(caminho_chave, scope)
         client = gspread.authorize(creds)
         sheet = client.open("Controle de Triagem Ciclare").sheet1
         
-        # Envia na ordem correta
         linha_dados = [estoque.get(mat, 0.0) for mat in MATERIAIS_ORDEM]
         sheet.append_row(linha_dados)
         
-        # Zera o estoque local
         salvar_estoque({mat: 0.0 for mat in MATERIAIS_ORDEM})
         
         return '''<script>alert("Contagem enviada!"); window.location.href="/";</script>'''
