@@ -11,20 +11,13 @@ MATERIAIS_ORDEM = [
     "Metalicos", "Aerosol", "Papelao"
 ]
 
-def inicializar_csv():
-    if not os.path.exists(CSV_FILE):
-        with open(CSV_FILE, mode='w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow(['Material', 'Quantidade'])
-            for mat in MATERIAIS_ORDEM:
-                writer.writerow([mat, 0.0])
-
 def ler_estoque():
     estoque = {}
-    with open(CSV_FILE, mode='r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            estoque[row['Material']] = float(row['Quantidade'])
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, mode='r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                estoque[row['Material']] = float(row['Quantidade'])
     return estoque
 
 def salvar_estoque(estoque):
@@ -33,8 +26,6 @@ def salvar_estoque(estoque):
         writer.writerow(['Material', 'Quantidade'])
         for mat in MATERIAIS_ORDEM:
             writer.writerow([mat, estoque.get(mat, 0.0)])
-
-inicializar_csv()
 
 @app.route('/')
 def index():
@@ -53,10 +44,11 @@ def atualizar():
     unidade = "caçambas" if material in ["Metalicos", "Papelao"] else "fardos"
     estoque = ler_estoque()
     qtd_atual = estoque.get(material, 0.0)
+    # Somar ou subtrair 1
     if operacao == 'somar':
-        estoque[material] = round(qtd_atual + 1.0, 2)
+        estoque[material] = qtd_atual + 1.0
     elif operacao == 'subtrair':
-        estoque[material] = round(max(0.0, qtd_atual - 1.0), 2)
+        estoque[material] = max(0.0, qtd_atual - 1.0)
     salvar_estoque(estoque)
     return render_template('ajuste.html', material=material, qtd_atual=estoque[material], unidade=unidade)
 
@@ -67,7 +59,8 @@ def baixar_resumo():
     for mat in MATERIAIS_ORDEM:
         if estoque.get(mat, 0.0) > 0:
             unidade = "caçambas" if mat in ["Metalicos", "Papelao"] else "fardos"
-            conteudo += f"{mat}: {estoque[mat]} {unidade}\n"
+            conteudo += f"{mat}: {int(estoque[mat])} {unidade}\n"
+    # Zera após baixar
     salvar_estoque({mat: 0.0 for mat in MATERIAIS_ORDEM})
     return Response(conteudo, mimetype='text/plain', headers={'Content-Disposition': 'attachment;filename=triagem.txt'})
 
