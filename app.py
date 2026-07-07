@@ -6,11 +6,12 @@ import gspread
 
 app = Flask(__name__)
 CSV_FILE = 'estoque.csv'
+
+# Ordem exata da sua planilha
 MATERIAIS_ORDEM = [
-    "PET Cristal", "PET Verde", "PET Óleo", "PEAD Branco", "PEAD Colorido", 
-    "Sopro", "PP Preto", "PP Colorido", "Filme Canela", "Filme Cristal", 
-    "Ráfia", "Plástico Misto", "Sucata de Ferro", "Inox", "Alumínio", 
-    "Metal", "Papelão", "Revista/Livro", "Papel Branco"
+    "PET Cristal", "PET Cor", "PET Óleo", "PET Azul", "PET Verde", 
+    "Alumínio", "PP Natural", "PP Cor", "PEAD Branco", "PEAD Cor", 
+    "Metálicos", "Aerossol", "Papelão"
 ]
 
 def inicializar_csv():
@@ -51,13 +52,17 @@ def selecionar(material):
 def atualizar():
     material = request.form.get('material')
     operacao = request.form.get('operacao')
+    
+    # Regra: 0.5 para Metálicos e Papelão, 1.0 para os demais
+    incremento = 0.5 if material in ["Metálicos", "Papelão"] else 1.0
+    
     estoque = ler_estoque()
     qtd_atual = estoque.get(material, 0.0)
 
     if operacao == 'somar':
-        estoque[material] = round(qtd_atual + 1.0, 2)
+        estoque[material] = round(qtd_atual + incremento, 2)
     elif operacao == 'subtrair':
-        estoque[material] = round(max(0.0, qtd_atual - 1.0), 2)
+        estoque[material] = round(max(0.0, qtd_atual - incremento), 2)
 
     salvar_estoque(estoque)
     return render_template('ajuste.html', material=material, qtd_atual=estoque[material])
@@ -71,10 +76,11 @@ def gravar():
         client = gspread.authorize(creds)
         sheet = client.open("Controle de Triagem Ciclare").sheet1
         
+        # Envia na ordem correta
         linha_dados = [estoque.get(mat, 0.0) for mat in MATERIAIS_ORDEM]
         sheet.append_row(linha_dados)
         
-        # Zera tudo
+        # Zera o estoque local
         salvar_estoque({mat: 0.0 for mat in MATERIAIS_ORDEM})
         
         return '''<script>alert("Contagem enviada!"); window.location.href="/";</script>'''
