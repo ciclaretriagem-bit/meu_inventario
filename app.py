@@ -1,13 +1,13 @@
 import os
 import csv
-from flask import Flask, render_template, request, redirect, url_for
+import json
+from flask import Flask, render_template, request
 from oauth2client.service_account import ServiceAccountCredentials
 import gspread
 
 app = Flask(__name__)
 CSV_FILE = 'estoque.csv'
 
-# Lista exata da sua planilha
 MATERIAIS_ORDEM = [
     "PET Cristal", "PET Misto/Cor", "PET Óleo", "PET Azul", "PET Verde", 
     "Alumínio", "PP Natural", "PP Color", "PEAD Natural/Br", "PEAD Cores", 
@@ -52,18 +52,13 @@ def selecionar(material):
 def atualizar():
     material = request.form.get('material')
     operacao = request.form.get('operacao')
-    
-    # 0.5 para Metálicos e Papelao, 1.0 para os outros
     incremento = 0.5 if material in ["Metálicos", "Papelao"] else 1.0
-    
     estoque = ler_estoque()
     qtd_atual = estoque.get(material, 0.0)
-
     if operacao == 'somar':
         estoque[material] = round(qtd_atual + incremento, 2)
     elif operacao == 'subtrair':
         estoque[material] = round(max(0.0, qtd_atual - incremento), 2)
-
     salvar_estoque(estoque)
     return render_template('ajuste.html', material=material, qtd_atual=estoque[material])
 
@@ -72,17 +67,14 @@ def gravar():
     estoque = ler_estoque()
     try:
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        # Caminho absoluto para evitar erros de leitura
-        caminho_chave = os.path.join(os.getcwd(), 'credenciais.json')
-        creds = ServiceAccountCredentials.from_json_keyfile_name(caminho_chave, scope)
+        # Lê a credencial diretamente da memória (variável de ambiente)
+        creds_data = json.loads(os.environ['GOOGLE_CREDENTIALS_JSON'])
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_data, scope)
         client = gspread.authorize(creds)
         sheet = client.open("Controle de Triagem Ciclare").sheet1
-        
         linha_dados = [estoque.get(mat, 0.0) for mat in MATERIAIS_ORDEM]
         sheet.append_row(linha_dados)
-        
         salvar_estoque({mat: 0.0 for mat in MATERIAIS_ORDEM})
-        
         return '''<script>alert("Contagem enviada!"); window.location.href="/";</script>'''
     except Exception as e:
         return f"Erro ao gravar: {str(e)} <br> <a href='/'>Voltar</a>"
