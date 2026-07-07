@@ -1,9 +1,6 @@
 import os
 import csv
-import json
-from flask import Flask, render_template, request
-from oauth2client.service_account import ServiceAccountCredentials
-import gspread
+from flask import Flask, render_template, request, Response
 
 app = Flask(__name__)
 CSV_FILE = 'estoque.csv'
@@ -11,7 +8,7 @@ CSV_FILE = 'estoque.csv'
 MATERIAIS_ORDEM = [
     "PET Cristal", "PET Misto/Cor", "PET Óleo", "PET Azul", "PET Verde", 
     "Alumínio", "PP Natural", "PP Color", "PEAD Natural/Br", "PEAD Cores", 
-    "Metálicos", "Aerosol", "Papelao"
+    "Metalicos", "Aerosol", "Papelao"
 ]
 
 def inicializar_csv():
@@ -52,7 +49,7 @@ def selecionar(material):
 def atualizar():
     material = request.form.get('material')
     operacao = request.form.get('operacao')
-    incremento = 0.5 if material in ["Metálicos", "Papelao"] else 1.0
+    incremento = 0.5 if material in ["Metalicos", "Papelao"] else 1.0
     estoque = ler_estoque()
     qtd_atual = estoque.get(material, 0.0)
     if operacao == 'somar':
@@ -62,22 +59,19 @@ def atualizar():
     salvar_estoque(estoque)
     return render_template('ajuste.html', material=material, qtd_atual=estoque[material])
 
-@app.route('/gravar')
-def gravar():
+@app.route('/baixar_resumo')
+def baixar_resumo():
     estoque = ler_estoque()
-    try:
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        # Lê a credencial diretamente da memória (variável de ambiente)
-        creds_data = json.loads(os.environ['GOOGLE_CREDENTIALS_JSON'])
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_data, scope)
-        client = gspread.authorize(creds)
-        sheet = client.open("Controle de Triagem Ciclare").sheet1
-        linha_dados = [estoque.get(mat, 0.0) for mat in MATERIAIS_ORDEM]
-        sheet.append_row(linha_dados)
-        salvar_estoque({mat: 0.0 for mat in MATERIAIS_ORDEM})
-        return '''<script>alert("Contagem enviada!"); window.location.href="/";</script>'''
-    except Exception as e:
-        return f"Erro ao gravar: {str(e)} <br> <a href='/'>Voltar</a>"
+    conteudo = "Resumo da Triagem Ciclare:\n\n"
+    for mat in MATERIAIS_ORDEM:
+        if estoque.get(mat, 0.0) > 0:
+            conteudo += f"{mat}: {estoque[mat]}\n"
+    
+    # Zera o estoque após baixar
+    salvar_estoque({mat: 0.0 for mat in MATERIAIS_ORDEM})
+    
+    return Response(conteudo, mimetype='text/plain', 
+                    headers={'Content-Disposition': 'attachment;filename=triagem.txt'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
