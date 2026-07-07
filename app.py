@@ -43,21 +43,22 @@ def index():
 @app.route('/selecionar/<material>')
 def selecionar(material):
     estoque = ler_estoque()
-    return render_template('ajuste.html', material=material, qtd_atual=estoque.get(material, 0.0))
+    unidade = "caçambas" if material in ["Metalicos", "Papelao"] else "fardos"
+    return render_template('ajuste.html', material=material, qtd_atual=estoque.get(material, 0.0), unidade=unidade)
 
 @app.route('/atualizar', methods=['POST'])
 def atualizar():
     material = request.form.get('material')
     operacao = request.form.get('operacao')
-    incremento = 0.5 if material in ["Metalicos", "Papelao"] else 1.0
+    unidade = "caçambas" if material in ["Metalicos", "Papelao"] else "fardos"
     estoque = ler_estoque()
     qtd_atual = estoque.get(material, 0.0)
     if operacao == 'somar':
-        estoque[material] = round(qtd_atual + incremento, 2)
+        estoque[material] = round(qtd_atual + 1.0, 2)
     elif operacao == 'subtrair':
-        estoque[material] = round(max(0.0, qtd_atual - incremento), 2)
+        estoque[material] = round(max(0.0, qtd_atual - 1.0), 2)
     salvar_estoque(estoque)
-    return render_template('ajuste.html', material=material, qtd_atual=estoque[material])
+    return render_template('ajuste.html', material=material, qtd_atual=estoque[material], unidade=unidade)
 
 @app.route('/baixar_resumo')
 def baixar_resumo():
@@ -65,7 +66,8 @@ def baixar_resumo():
     conteudo = "Resumo da Triagem Ciclare:\n\n"
     for mat in MATERIAIS_ORDEM:
         if estoque.get(mat, 0.0) > 0:
-            conteudo += f"{mat}: {estoque[mat]}\n"
+            unidade = "caçambas" if mat in ["Metalicos", "Papelao"] else "fardos"
+            conteudo += f"{mat}: {estoque[mat]} {unidade}\n"
     salvar_estoque({mat: 0.0 for mat in MATERIAIS_ORDEM})
     return Response(conteudo, mimetype='text/plain', headers={'Content-Disposition': 'attachment;filename=triagem.txt'})
 
