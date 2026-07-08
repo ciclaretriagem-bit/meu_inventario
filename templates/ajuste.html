@@ -3,24 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajuste - {{ material }}</title>
+    <title>Contar {{ material }}</title>
     <style>
         body { font-family: sans-serif; padding: 20px; text-align: center; }
-        .qtd { font-size: 3em; color: #28a745; margin: 20px 0; }
-        .btn { display: inline-block; width: 45%; padding: 30px 0; font-size: 1.2em; border-radius: 8px; text-decoration: none; color: white; margin: 5px; }
+        .qtd { font-size: 2.5em; color: #28a745; margin-bottom: 20px; }
+        .visor { font-size: 2em; padding: 10px; background: #eee; margin: 10px; border-radius: 8px; }
+        .grid-num { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        button { padding: 20px; font-size: 1.5em; border-radius: 8px; border: 1px solid #ccc; background: white; }
+        .btn-somar { background: #28a745; color: white; grid-column: span 3; }
     </style>
 </head>
 <body>
     <h1>{{ material }}</h1>
     <div class="qtd">{{ qtd_atual }} {{ unidade }}</div>
     
-    <form action="/atualizar" method="POST">
-        <input type="hidden" name="material" value="{{ material }}">
-        <button name="operacao" value="subtrair" class="btn" style="background:#e67e22;">-</button>
-        <button name="operacao" value="somar" class="btn" style="background:#2980b9;">+</button>
-    </form>
+    <div class="visor" id="visor">0</div>
     
-    <br><br>
-    <a href="/" style="font-size: 1.2em;">← Voltar ao Painel</a>
+    <div class="grid-num">
+        <button onclick="add(1)">1</button><button onclick="add(2)">2</button><button onclick="add(3)">3</button>
+        <button onclick="add(4)">4</button><button onclick="add(5)">5</button><button onclick="add(6)">6</button>
+        <button onclick="add(7)">7</button><button onclick="add(8)">8</button><button onclick="add(9)">9</button>
+        <button onclick="limpar()">C</button><button onclick="add(0)">0</button>
+        <form action="/atualizar" method="POST" style="grid-column: span 3;">
+            <input type="hidden" name="material" value="{{ material }}">
+            <input type="hidden" name="valor" id="valor_input" value="0">
+            <button type="submit" class="btn-somar">SOMAR AO TOTAL</button>
+        </form>
+    </div>
+    
+    <a href="/">← Voltar ao Painel</a>
+
+    <script>
+        let atual = "";
+        function add(n) {
+            atual += n;
+            document.getElementById('visor').innerText = atual;
+            document.getElementById('valor_input').value = atual;
+        }
+        function limpar() {
+            atual = "";
+            document.getElementById('visor').innerText = "0";
+            document.getElementById('valor_input').value = "0";
+        }
+    </script>
 </body>
 </html>
