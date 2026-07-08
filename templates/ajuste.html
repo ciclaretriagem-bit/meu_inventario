@@ -7,10 +7,10 @@
     <style>
         body { font-family: sans-serif; padding: 20px; text-align: center; }
         .qtd { font-size: 2.5em; color: #28a745; margin-bottom: 20px; }
-        .visor { font-size: 2em; padding: 10px; background: #eee; margin: 10px; border-radius: 8px; }
-        .grid-num { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        button { padding: 20px; font-size: 1.5em; border-radius: 8px; border: 1px solid #ccc; background: white; }
-        .btn-somar { background: #28a745; color: white; grid-column: span 3; }
+        .visor { font-size: 2em; padding: 15px; background: #eee; margin: 10px; border-radius: 8px; min-height: 40px; }
+        .grid-num { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        button { padding: 25px; font-size: 1.5em; border-radius: 8px; border: 1px solid #ccc; background: white; }
+        .btn-somar { background: #28a745; color: white; grid-column: span 3; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -20,10 +20,11 @@
     <div class="visor" id="visor">0</div>
     
     <div class="grid-num">
-        <button onclick="add(1)">1</button><button onclick="add(2)">2</button><button onclick="add(3)">3</button>
-        <button onclick="add(4)">4</button><button onclick="add(5)">5</button><button onclick="add(6)">6</button>
-        <button onclick="add(7)">7</button><button onclick="add(8)">8</button><button onclick="add(9)">9</button>
-        <button onclick="limpar()">C</button><button onclick="add(0)">0</button>
+        <button onclick="add('1')">1</button><button onclick="add('2')">2</button><button onclick="add('3')">3</button>
+        <button onclick="add('4')">4</button><button onclick="add('5')">5</button><button onclick="add('6')">6</button>
+        <button onclick="add('7')">7</button><button onclick="add('8')">8</button><button onclick="add('9')">9</button>
+        <button onclick="limpar()">C</button><button onclick="add('0')">0</button><button onclick="add('.')">.</button>
+        
         <form action="/atualizar" method="POST" style="grid-column: span 3;">
             <input type="hidden" name="material" value="{{ material }}">
             <input type="hidden" name="valor" id="valor_input" value="0">
@@ -31,7 +32,7 @@
         </form>
     </div>
     
-    <a href="/">← Voltar ao Painel</a>
+    <br><a href="/">← Voltar ao Painel</a>
 
     <script>
         let atual = "";
